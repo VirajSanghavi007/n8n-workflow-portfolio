@@ -1,0 +1,69 @@
+{
+  "name": "Finance Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "48a5242f-e833-4624-977b-f48402c6c6e8",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "sendTo": "virajsanghavi000@gmail.com",
+        "subject": "Welcome to the Finance Department ",
+        "message": "Great Wishes to you !!!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8f0c7f4f-6e05-42a7-8845-c728410bbc55",
+      "name": "Send a message",
+      "webhookId": "fe777931-9706-4fae-b3f9-a0a29ea1190c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yjMaxTObhH8uAZ5w",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "74712f72-c554-4d4e-8da0-9f73720c0f0a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "59e08c44e8ab9be80eace52829adcc43103a593f57779f8c452104ca9bea9474"
+  },
+  "nodeGroups": [],
+  "id": "SyJWzsKp46grmqeS",
+  "tags": []
+}

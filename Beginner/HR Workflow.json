@@ -1,0 +1,69 @@
+{
+  "name": "HR Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dfaffc48-ac52-4d63-8175-e756fc4ff424",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "sendTo": "virajsanghavi000@gmail.com",
+        "subject": "Welcome to the HR Department ",
+        "message": "Great Wishes to you !!!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "32bbbfb0-d374-4e22-9357-09e8ab7dcad4",
+      "name": "Send a message",
+      "webhookId": "066fc4cb-8059-4088-a1cf-fb69f2911877",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yjMaxTObhH8uAZ5w",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "28b5b997-42d0-4c96-8559-f866bf0e329c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "59e08c44e8ab9be80eace52829adcc43103a593f57779f8c452104ca9bea9474"
+  },
+  "nodeGroups": [],
+  "id": "BymlSUQXD2UXDDaX",
+  "tags": []
+}

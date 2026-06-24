@@ -32,9 +32,32 @@ Wrong auth header → 403, workflow never starts
 Valid employee in each of three departments → correct sub-workflow fires
 
 
-Intermediate: Customer Support Ticket System
-Webhook receives support ticket (Name, Email, Issue, Priority) → validates data → checks for duplicate tickets from same email in Postgres database → routes based on Priority (High/Medium/Low) to different response sub-workflows → stores ticket in Postgres → sends acknowledgement email to customer → logs to audit sheet → error workflow catches failures.
-New concepts added: Postgres node, database queries, priority-based routing.
+Intermediate: Daily News Digest Aggregator
+What it does:
+
+Every morning at 8am, pulls news from 3 different public APIs, merges the results, deduplicates by title, ranks by relevance score, and emails you a clean digest.
+New concepts:
+
+Schedule Trigger — no webhook, runs automatically
+HTTP Request node — hitting real public APIs
+Merge node — combining data from multiple parallel branches
+Code node for ranking — scoring articles by keyword match
+Deduplication — removing duplicate stories across sources
+HTML email formatting — sending a styled digest not plain text
+
+Flow:
+
+Schedule Trigger — 8am daily
+Three parallel HTTP Request nodes — fetch from 3 news APIs simultaneously (NewsAPI, HackerNews, Reddit RSS)
+Merge node — combines all three into one stream
+Code node — deduplicate by title, score each article by keywords you care about (AI, fintech, logistics)
+Sort — highest score first
+Code node — build HTML email body
+Gmail — send digest
+
+What makes it different:
+
+Parallel branches, real external APIs, data merging, scoring logic, HTML output. None of which you touched in the beginner project.
 
 Advanced: Sales Pipeline Automation
 Webhook receives lead data → authenticates → validates → duplicate check in Postgres → enriches lead data via HTTP Request to a public company API → scores the lead with a Code node (based on company size, department, role) → routes high-score leads to one sub-workflow (sends personalized email + creates a follow-up task logged in Postgres) and low-score leads to another (sends generic email) → scheduled workflow runs every 24 hours pulling all pending leads from Postgres, aggregates stats, and emails a daily summary report → full audit trail → error handling throughout.

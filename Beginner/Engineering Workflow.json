@@ -1,0 +1,69 @@
+{
+  "name": "Engineering Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4e0081d3-a7bf-4a09-95de-ada5562d5904",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "sendTo": "virajsanghavi000@gmail.com",
+        "subject": "Welcome to the Engineering Department ",
+        "message": "Great Wishes to you !!!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "64ef4c9b-4734-47f0-99b5-4dd91af02ffa",
+      "name": "Send a message",
+      "webhookId": "ad85f762-dc49-488f-9723-141c5dca48b2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yjMaxTObhH8uAZ5w",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2f59962a-76ad-4f94-a722-ce81f41d867b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "59e08c44e8ab9be80eace52829adcc43103a593f57779f8c452104ca9bea9474"
+  },
+  "nodeGroups": [],
+  "id": "Rqt543PHxApT344U",
+  "tags": []
+}
