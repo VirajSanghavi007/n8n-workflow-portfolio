@@ -1,64 +1,62 @@
-"# n8n-workflow-portfolio" 
-Write what problem it solves, what nodes are used, and how to test it
+# n8n Workflow Automation Portfolio
 
+This repository contains production-pattern workflow automation projects built with n8n, demonstrating progressive complexity across data validation, routing, sub-workflow orchestration, and AI-assisted document processing.
 
-Project: Employee Onboarding + HR Automation System
-What it does end to end:
+---
 
-A complete HR pipeline that handles new employee submissions, validates them, detects duplicates, stores records, notifies relevant parties, handles errors, and maintains a full audit trail.
-Full workflow:
+## Project 1: Employee Onboarding Pipeline
 
-Webhook — receives new employee JSON (Name, Email, Age, Department, Role)
-Header Auth — rejects unauthorized requests
-IF: Field Validation — checks Name, Email, Department all exist and are non-null
-False path → Gmail alert "Invalid submission" → Stop and Error
-True path → Edit Fields — clean and structure data, add timestamp
-Get rows in sheet — read existing employee records
-Code node — duplicate email check, throw error if found
-IF: Department Router — routes to different sub-workflows based on Department value
-Sub-workflow: Engineering — sends Engineering-specific welcome email
-Sub-workflow: HR — sends HR-specific welcome email
-Sub-workflow: Finance — sends Finance-specific welcome email
-Append row in sheet — write to main Employee Records sheet
-Audit Log append — write to separate Audit sheet: timestamp, name, email, department, status
-Error workflow — catches any crash, sends Gmail alert with error details, logs to Audit sheet as "system error"
+### Overview
 
-Test cases to verify:
+An automated HR onboarding pipeline that processes incoming employee submissions, validates data integrity, detects duplicate records, routes by department, and maintains a full audit trail — with error handling throughout.
 
-Valid new employee → goes through, emails sent, logged
-Missing Email field → rejected, alert sent, logged
-Duplicate email → rejected, alert sent, logged
-Wrong auth header → 403, workflow never starts
-Valid employee in each of three departments → correct sub-workflow fires
+### Architecture
 
+The pipeline receives employee records via authenticated webhook, validates all required fields against a regex-checked schema, performs duplicate detection against existing Google Sheets records, routes valid submissions through department-specific sub-workflows, appends clean records to the master employee sheet, and logs every execution outcome to a separate audit sheet. Invalid submissions and system failures are caught and routed to Gmail alerts.
 
-Intermediate: Daily News Digest Aggregator
-What it does:
+### Concepts Demonstrated
 
-Every morning at 8am, pulls news from 3 different public APIs, merges the results, deduplicates by title, ranks by relevance score, and emails you a clean digest.
-New concepts:
+- Webhook authentication via custom header token
+- Batch processing using Split Out node
+- Field validation with regex email format checking
+- Duplicate detection via JavaScript Code node comparing incoming records against existing sheet data
+- Department-based routing using Switch node
+- Sub-workflow orchestration across Engineering, HR, and Finance pipelines
+- Parallel output handling — valid path and invalid path simultaneously active
+- Audit logging with timestamp on every execution outcome
+- Error workflow with Error Trigger node catching system-level failures
 
-Schedule Trigger — no webhook, runs automatically
-HTTP Request node — hitting real public APIs
-Merge node — combining data from multiple parallel branches
-Code node for ranking — scoring articles by keyword match
-Deduplication — removing duplicate stories across sources
-HTML email formatting — sending a styled digest not plain text
+### Technical Challenges
 
-Flow:
+The most significant challenge was correctly referencing data across nodes once the workflow grew beyond a linear structure. Early attempts used `.item` references which silently returned only the first record regardless of how many items were in the pipeline. This was resolved by switching to `.first()` and `.all()` depending on context, and by explicitly naming node references rather than relying on implicit input chaining.
 
-Schedule Trigger — 8am daily
-Three parallel HTTP Request nodes — fetch from 3 news APIs simultaneously (NewsAPI, HackerNews, Reddit RSS)
-Merge node — combines all three into one stream
-Code node — deduplicate by title, score each article by keywords you care about (AI, fintech, logistics)
-Sort — highest score first
-Code node — build HTML email body
-Gmail — send digest
+A related issue was data nesting — incoming webhook data was structured as `item.json.body.Email` rather than `item.json.Email`, which caused the duplicate detection logic to silently fail. The fix required inspecting the raw JSON output at each node before writing any Code node logic, which became a consistent practice for the rest of the build.
 
-What makes it different:
+Batch processing introduced a further complication: the Code node's `$input.all()` returned sheet rows rather than incoming employees because of how the node was positioned in the chain. This was resolved by explicitly referencing the upstream employee node via `$('Edit Fields').all()` while using `$input.all()` exclusively for the sheet comparison data.
 
-Parallel branches, real external APIs, data merging, scoring logic, HTML output. None of which you touched in the beginner project.
+### Stack
 
-Advanced: Sales Pipeline Automation
-Webhook receives lead data → authenticates → validates → duplicate check in Postgres → enriches lead data via HTTP Request to a public company API → scores the lead with a Code node (based on company size, department, role) → routes high-score leads to one sub-workflow (sends personalized email + creates a follow-up task logged in Postgres) and low-score leads to another (sends generic email) → scheduled workflow runs every 24 hours pulling all pending leads from Postgres, aggregates stats, and emails a daily summary report → full audit trail → error handling throughout.
-New concepts added: API enrichment, lead scoring logic, scheduled + webhook combo, aggregated reporting.
+n8n Cloud, Google Sheets, Gmail, JavaScript
+
+---
+
+## Project 2: Intelligent Document Processing Pipeline
+
+*In progress*
+
+---
+
+## Repository Structure
+
+```
+n8n-workflow-portfolio/
+├── README.md
+├── beginner/
+│   └── employee-onboarding.json
+└── advanced/
+    └── document-processing-pipeline.json
+```
+
+## Importing Workflows
+
+Each workflow is exported as a JSON file. To import into n8n: open your n8n instance, navigate to Workflows, select Import from File, and choose the relevant JSON file. Credentials will need to be reconfigured after import.
