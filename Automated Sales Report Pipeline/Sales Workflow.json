@@ -1,0 +1,385 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "73abc2f2-7fbc-48ec-9772-dc3674cdf9f2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst KPIs = items.map((item) => {\n  let revenue = item.json.Revenue;\n  let growth =\n    ((revenue - item.json.Previous_Week_Revenue) /\n      item.json.Previous_Week_Revenue) *\n    100;\n  let targetAchievement = (revenue / item.json.Weekly_Target) * 100;\n  return { ...item.json, revenue, growth, targetAchievement };\n});\n\nconst topPerformer = KPIs.reduce((prev, current) =>\n  prev.revenue > current.revenue ? prev : current,\n);\n\nKPIs.forEach((item) => {\n  if (item.Rep_Name === topPerformer.Rep_Name) {\n    item.topPerformer = true;\n  }\n});\n\nreturn KPIs.map((item) => ({ json: item }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        0
+      ],
+      "id": "ea4998f2-aa67-4ffd-ad37-892ebc438647",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const reps = $input.all().map((item) => item.json);\n\nconst flaggedReps = reps.map((rep) => {\n  const dropPercentage =\n    (rep.Previous_Week_Revenue - rep.Revenue) / rep.Previous_Week_Revenue;\n  rep.flagged = dropPercentage > 0.2;\n  return rep;\n});\n\nreturn flaggedReps;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        0
+      ],
+      "id": "8c85d32e-939c-46a7-823b-bb7e74cc9053",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b8a07fc4-5c5c-4618-a2fc-3153caa33a3e",
+              "leftValue": "={{ $json.flagged }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "51298e92-c3af-47d1-8c5b-7ae29a2d7025",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "virajsanghavi000@gmail.com",
+        "subject": "Anomaly in Sales Report",
+        "message": "=Dear Managar, An anomaly was found in the sales sreport. An employee {{ $json.Rep_Name }} shows slower by the rate of {{ $json.growth }}.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1408,
+        80
+      ],
+      "id": "14a2709a-1b24-4578-bc24-a623cca0e5f1",
+      "name": "Send a message",
+      "webhookId": "28ff0717-e1a4-4335-a90f-da34976c127a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yjMaxTObhH8uAZ5w",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.all().map((item) => item.json);\n\nconst htmlReport = data\n  .map((item) => {\n    let html = `<div><h1>${item[\"Total Revenue\"]}</h1><ul>`;\n    html += `<li>Total Units Sold: ${item[\"Total__Units_Sold\"]}</li>`;\n    html += `<li>Previous Week Revenue: ${item[\"Previous_Week_Revenue\"]}</li>`;\n    html += \"</ul></div>\";\n    return html;\n  })\n  .join(\"\");\n\nreturn [{ json: { htmlReport }, pairedItem: data.map((_, index) => index) }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        -80
+      ],
+      "id": "a02cd8c0-c7a3-406e-9add-c8b01a8a78ba",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "sendTo": "virajsanghavi000@gmail.com",
+        "subject": "Weekly Sales Report",
+        "message": "=The following is the weekly report for Sales: {{ $json.projects }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1808,
+        -80
+      ],
+      "id": "23681043-f962-4721-82f3-48de1d6ae8fe",
+      "name": "Send a message1",
+      "webhookId": "be7aacde-82e2-4107-a7d9-0d19eae7cd7e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yjMaxTObhH8uAZ5w",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "13f-g5PsEMViDcibSZgDCpQYYDQ2mw5zHqL6M1QVan78",
+          "mode": "list",
+          "cachedResultName": "Sales Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13f-g5PsEMViDcibSZgDCpQYYDQ2mw5zHqL6M1QVan78/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13f-g5PsEMViDcibSZgDCpQYYDQ2mw5zHqL6M1QVan78/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -144
+      ],
+      "id": "46242219-0ac7-4a6e-bc81-9f02fc2f6dd2",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TydimuFDmEV21G3Z",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Vu_FCb4ZnJKp6P4SfAmgtn7f8u9AkvShdz6KShBmv6Q",
+          "mode": "list",
+          "cachedResultName": "Targets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Vu_FCb4ZnJKp6P4SfAmgtn7f8u9AkvShdz6KShBmv6Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Vu_FCb4ZnJKp6P4SfAmgtn7f8u9AkvShdz6KShBmv6Q/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        160
+      ],
+      "id": "58e23512-d523-4125-a0f2-b10da1fbe0f5",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TydimuFDmEV21G3Z",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        496,
+        0
+      ],
+      "id": "a9b4197c-3bdd-4407-832c-2b90c463fec0",
+      "name": "Merge",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "Revenue"
+            },
+            {
+              "aggregation": "sum",
+              "field": "Units_Sold"
+            },
+            {
+              "field": "Rep_Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        1408,
+        -80
+      ],
+      "id": "7269cc30-8b52-47a8-9db7-de1f6150cef2",
+      "name": "Summarize"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "40394315-5f0e-4bd8-a5f2-9b18b5dd567b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "59e08c44e8ab9be80eace52829adcc43103a593f57779f8c452104ca9bea9474"
+  },
+  "nodeGroups": [],
+  "id": "PkHBEqOME81WcEW7",
+  "tags": []
+}
